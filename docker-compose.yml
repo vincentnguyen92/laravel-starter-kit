@@ -1,0 +1,50 @@
+version: "3.6"
+
+services:
+
+  php:
+    container_name: laravel-php
+    image: iamvincent/laravel-php
+    depends_on:
+      - nginx
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+
+  nginx:
+    container_name: laravel-nginx
+    image: iamvincent/laravel-nginx
+    restart: unless-stopped
+    volumes:
+      - .:/var/www
+    ports:
+      - 80:80
+      - 443:443
+
+  mysql:
+    container_name: laravel-mysql
+    image: iamvincent/laravel-mysql
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    volumes:
+      - /var/lib/mysql
+      - ./storage/logs:/var/log/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel
+    ports:
+      - 3306:3306
+
+  phpmyadmin:
+    container_name: laravel-phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    depends_on:
+      - mysql
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=laravel-mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    ports:
+      - 8088:80
